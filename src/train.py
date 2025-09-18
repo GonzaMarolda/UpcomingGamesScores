@@ -4,16 +4,20 @@ import torch.optim as optim
 from dataset import get_dataloaders
 from model import GameScorePredictor
 import os
+import json
 
-EPOCHS = 30
-LR = 0.01
+EPOCHS = 50
+LR = 0.001
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 train_loader, test_loader, input_dim = get_dataloaders()
 
 model = GameScorePredictor(input_dim).to(DEVICE)
 criterion = nn.MSELoss()
-optimizer = optim.SGD(model.parameters(), lr=LR)
+optimizer = optim.Adam(model.parameters(), lr=LR)
+
+final_train_loss = 0.0
+final_val_loss = 0.0
 
 for epoch in range(EPOCHS):
     model.train() # Changes how the model behaves for advanced configurations. Not needed for this simple model but good practice.
@@ -34,6 +38,7 @@ for epoch in range(EPOCHS):
         running_loss += loss.item() * inputs.size(0) # Accumulated loss for the batch
 
     epoch_loss = running_loss / len(train_loader.dataset) # Mean loss for the epoch
+    final_train_loss = epoch_loss
 
     # Validation
     model.eval()
@@ -46,6 +51,7 @@ for epoch in range(EPOCHS):
             val_loss += loss.item() * inputs.size(0)
 
     val_loss /= len(test_loader.dataset)
+    final_val_loss = val_loss
 
     print(f"Epoch [{epoch+1}/{EPOCHS}] - Train Loss: {epoch_loss:.4f} - Val Loss: {val_loss:.4f}")
 
@@ -60,4 +66,43 @@ model_filename = f"gamescore_model_v{version}.pth"
 model_path = os.path.join(SAVE_PATH, model_filename)
 
 torch.save(model.state_dict(), model_path)
-print(f"Modelo guardado en {model_path}")
+print(f"Model saved in {model_path}")
+
+# Compute MSE and MAE on test set
+mse_loss_fn = nn.MSELoss()
+mae_loss_fn = nn.L1Loss()
+
+mse_total = 0.0
+mae_total = 0.0
+num_samples = 0
+
+model.eval()
+with torch.no_grad():
+    for inputs, targets in test_loader:
+        inputs, targets = inputs.to(DEVICE), targets.to(DEVICE)
+        outputs = model(inputs)
+        mse_total += mse_loss_fn(outputs, targets).item() * inputs.size(0)
+        mae_total += mae_loss_fn(outputs, targets).item() * inputs.size(0)
+        num_samples += inputs.size(0)
+
+mse_total /= num_samples
+mae_total /= num_samples
+
+# Save the results
+RESULTS_PATH = "../trained_models/results"
+
+results = {
+    "model_name": model_filename.split(".")[0],
+    "train_loss": final_train_loss,
+    "val_loss": final_val_loss,
+    "MSE": mse_total,
+    "MAE": mae_total,
+    "epoch": EPOCHS,
+    "learning_rate": LR
+}
+
+json_file = os.path.join(RESULTS_PATH, f"results_{results['model_name']}.json")
+
+with open(json_file, "w") as f:
+    json.dump(results, f, indent=4)
+print(f"Results saved in {json_file}")
