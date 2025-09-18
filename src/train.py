@@ -7,14 +7,14 @@ import os
 import json
 
 EPOCHS = 50
-LR = 0.001
+LR = 0.05
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 train_loader, test_loader, input_dim = get_dataloaders()
 
 model = GameScorePredictor(input_dim).to(DEVICE)
 criterion = nn.MSELoss()
-optimizer = optim.Adam(model.parameters(), lr=LR)
+optimizer = optim.SGD(model.parameters(), lr=LR)
 
 final_train_loss = 0.0
 final_val_loss = 0.0

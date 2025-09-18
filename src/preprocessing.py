@@ -16,10 +16,13 @@ raw_df = raw_df.dropna(subset=["release_date"])
 raw_df = raw_df[(raw_df["release_date"].dt.year >= 2015) & (raw_df["release_date"].dt.year <= 2025)]
 print(f"[INFO] Games after filtering by date (2015–2025): {len(raw_df)}")
 
-# Filter out lesser known games (less than 100000 owners)
-filtered_out = ["0 - 0", "0 - 20000", "20000 - 50000", "50000 - 100000"]
-raw_df = raw_df[raw_df["estimated_owners"].isin(filtered_out) == False]
-print(f"[INFO] Games after filtering by estimated owners (x >= 100,000): {len(raw_df)}")
+# Filter out lesser known games (less than 10k reviews)
+raw_df = raw_df[raw_df["num_reviews_total"] >= 2000]
+print(f"[INFO] Games after filtering by reviews count (x >= 2,000): {len(raw_df)}")
+
+# Filter out games without tags
+raw_df = raw_df[raw_df["tags"].notna() & (raw_df["tags"] != "[]")]
+print(f"[INFO] Games after filtering out games without tags: {len(raw_df)}")
 
 # Normalize year [2015–2030] to [0–1]
 raw_df["year_norm"] = (raw_df["release_date"].dt.year - 2015) / (2030 - 2015)
@@ -31,7 +34,7 @@ raw_df["required_age_norm"] = raw_df["required_age"].clip(0, 21) / 21
 raw_df["pct_pos_total_norm"] = raw_df["pct_pos_total"].clip(0, 100) / 100
 
 # Top 150 tags and one-hot encoding
-top_n_tags = 150
+top_n_tags = 300
 all_tags = raw_df["tags"].apply(lambda tags: ast.literal_eval(tags)).explode()
 top_tags = all_tags.value_counts().head(top_n_tags).index
 print(f"[INFO] Total tags found: {all_tags.nunique()}")
@@ -45,7 +48,7 @@ for tag in top_tags:
 raw_df["lang_count"] = raw_df["supported_languages"].apply(lambda langs: len(ast.literal_eval(langs)))
 raw_df["lang_norm"] = raw_df["lang_count"].clip(0, 15) / 15
 
-# Add supports_english and is_for_adults column
+# Add supports_english,and is_for_adults columns
 raw_df["supports_english"] = raw_df["supported_languages"].apply(
     lambda langs: "English" in ast.literal_eval(langs)
 )
