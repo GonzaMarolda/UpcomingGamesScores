@@ -1,9 +1,0 @@
-{
-    "model_name": "gamescore_model_v6",
-    "train_loss": 0.003060395104776624,
-    "val_loss": 0.011634601967394813,
-    "MSE": 0.011634601967394813,
-    "MAE": 0.0798244547358779,
-    "epoch": 300,
-    "learning_rate": 0.02
-}

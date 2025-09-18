@@ -7,8 +7,10 @@ class GameScorePredictor(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(input_dim, 128),
             nn.ReLU(),
+            nn.Dropout(0.3),
             nn.Linear(128, 64),
             nn.ReLU(),
+            nn.Dropout(0.3),
             nn.Linear(64, 1)  
         )
     
