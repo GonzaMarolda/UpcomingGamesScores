@@ -3,10 +3,11 @@ from sklearn.model_selection import train_test_split
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-CSV_PATH = "../data/processed.csv"
+CSV_PATH = "./data/processed.csv"
 
-def get_dataloaders(batch_size=32, test_size=0.2):
-    df = pd.read_csv(CSV_PATH)
+def get_dataloaders(batch_size=32, test_size=0.2, isProduction=False):
+    csv_path = CSV_PATH if isProduction else "../data/processed.csv"
+    df = pd.read_csv(csv_path)
 
     X = df.drop(columns=["pct_pos_total_norm"]).values.astype("float32") # Pytorch works better with float32
     y = df["pct_pos_total_norm"].values.astype("float32").reshape(-1, 1) # Reshape for as many rows as needed and 1 column

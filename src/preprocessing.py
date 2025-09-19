@@ -24,6 +24,20 @@ print(f"[INFO] Games after filtering by reviews count (x >= 2,000): {len(raw_df)
 raw_df = raw_df[raw_df["tags"].notna() & (raw_df["tags"] != "[]")]
 print(f"[INFO] Games after filtering out games without tags: {len(raw_df)}")
 
+
+def normalize_data(data, column):
+    match column:
+        case "year":
+            return (data - 2015) / (2030 - 2015)
+        case "price":
+            return data.clip(0, 80) / 80
+        case "required_age":
+            return data.clip(0, 21) / 21
+        case "pct_pos_total":
+            return data.clip(0, 100) / 100
+        case _:
+            raise ValueError(f"Unknown column: {column}")
+
 # Normalize year [2015–2030] to [0–1]
 raw_df["year_norm"] = (raw_df["release_date"].dt.year - 2015) / (2030 - 2015)
 # Normalize price [0–100] to [0–1]
