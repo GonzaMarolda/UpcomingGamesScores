@@ -6,8 +6,8 @@ from model import GameScorePredictor
 import os
 import json
 
-EPOCHS = 50
-LR = 0.001
+EPOCHS = 200
+LR = 0.0005
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 train_loader, test_loader, input_dim = get_dataloaders()
@@ -17,8 +17,9 @@ criterion = nn.MSELoss()
 # Weight decay makes weights smaller over time, helping to prevent overfitting. Weights can grow large to adjust too much to the training data.
 optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=1e-4)
 
-final_train_loss = 0.0
-final_val_loss = 0.0
+final_train_loss = float("inf")
+best_val_loss = float("inf")
+best_model_state = None
 
 for epoch in range(EPOCHS):
     model.train() # Changes how the model behaves for advanced configurations. Not needed for this simple model but good practice.
@@ -39,7 +40,6 @@ for epoch in range(EPOCHS):
         running_loss += loss.item() * inputs.size(0) # Accumulated loss for the batch
 
     epoch_loss = running_loss / len(train_loader.dataset) # Mean loss for the epoch
-    final_train_loss = epoch_loss
 
     # Validation
     model.eval()
@@ -52,7 +52,11 @@ for epoch in range(EPOCHS):
             val_loss += loss.item() * inputs.size(0)
 
     val_loss /= len(test_loader.dataset)
-    final_val_loss = val_loss
+
+    if val_loss < best_val_loss:
+        final_train_loss = epoch_loss
+        best_val_loss = val_loss
+        best_model_state = model.state_dict()
 
     print(f"Epoch [{epoch+1}/{EPOCHS}] - Train Loss: {epoch_loss:.4f} - Val Loss: {val_loss:.4f}")
 
@@ -95,7 +99,7 @@ RESULTS_PATH = "../trained_models/results"
 results = {
     "model_name": model_filename.split(".")[0],
     "train_loss": final_train_loss,
-    "val_loss": final_val_loss,
+    "val_loss": best_val_loss,
     "MSE": mse_total,
     "MAE": mae_total,
     "epoch": EPOCHS,
