@@ -15,8 +15,8 @@ def get_dataloaders(batch_size=32, test_size=0.2, isProduction=False):
 
     X_train, X_test, y_train, y_test, r_train, r_test = train_test_split(X, y, relevance, test_size=test_size)
 
-    weights_train = torch.tensor(r_train) ** 0.25
-    weights_test = torch.tensor(r_test) ** 0.25
+    weights_train = torch.tensor(r_train) ** 0.5
+    weights_test = torch.tensor(r_test) ** 0.5
 
     sampler_train = WeightedRandomSampler(weights=weights_train, num_samples=len(weights_train), replacement=True)
     sampler_test = WeightedRandomSampler(weights=weights_test, num_samples=len(weights_test), replacement=True)

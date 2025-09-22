@@ -13,10 +13,12 @@ print(f"[INFO] Games in raw data: {len(raw_df)}")
 
 output_cols = [
     "price_norm", 
+    "is_free",
     "required_age_norm", 
     "year_norm", 
     "price_year",
     "pct_pos_total_norm", 
+    "is_really_good",
     "num_reviews_total_norm",
     "supports_english", 
     "supports_few_languages", 

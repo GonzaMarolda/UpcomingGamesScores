@@ -16,6 +16,10 @@ def filter_games(df):
     df = df[df["tags"].notna() & (df["tags"] != "[]")]
     print(f"[INFO] Games after filtering out games without tags: {len(df)}")
 
+    # Filter by goodness (pct_pos_total >= 70)
+    df = df[df["pct_pos_total"] >= 70]
+    print(f"[INFO] Games after filtering by goodness (pct_pos_total >= 70): {len(df)}")
+
     return df
 
 def normalize_value(value, column):
@@ -27,7 +31,7 @@ def normalize_value(value, column):
         case "required_age":
             return value.clip(0, 21) / 21
         case "pct_pos_total":
-            return value.clip(0, 100) / 100
+            return value.clip(70, 100) / 100
         case _:
             raise ValueError(f"Unknown column: {column}")
 
@@ -38,8 +42,8 @@ def normalize_data(df):
     df["price_norm"] = df["price"].clip(0, 80) / 80
     # [0–21] to [0–1]
     df["required_age_norm"] = df["required_age"].clip(0, 21) / 21
-    # [0–100] to [0–1]
-    df["pct_pos_total_norm"] = df["pct_pos_total"].clip(0, 100) / 100
+    # [70–100] to [0–1]
+    df["pct_pos_total_norm"] = df["pct_pos_total"].clip(70, 100) / 100
     # [0-n] to [1000-25k]
     df["num_reviews_total_norm"] = df["num_reviews_total"].clip(1000, 25000) / 25000
 
@@ -48,6 +52,8 @@ def normalize_data(df):
 def add_additional_features(df):
     df["for_mature_audiences"] = df["required_age"].apply(lambda age: int(age) >= 17)
     df["price_year"] = df["price_norm"] * df["year_norm"]
+    df["is_free"] = df["price"] == 0
+    df["is_really_good"] = df["pct_pos_total"] >= 95
 
     df["supports_english"] = df["supported_languages"].apply(
         lambda langs: "English" in ast.literal_eval(langs)
