@@ -29,18 +29,47 @@ raw_df = filter_games(raw_df)
 raw_df = normalize_data(raw_df)
 raw_df = add_additional_features(raw_df)
 
-#Top 300 tags and one-hot encoding
+# Create tags index columns for embedding
 top_n_tags = 300
-all_tags = raw_df["tags"].apply(lambda tags: ast.literal_eval(tags)).explode()
-top_tags = all_tags.value_counts().head(top_n_tags).index
-print(f"[INFO] Total tags found: {all_tags.nunique()}")
-print(f"[INFO] Using top {top_n_tags} most common")
-for tag in top_tags:
-    col_name = f"tag_{tag}".replace(" ", "_").replace("-", "_")
-    raw_df[col_name] = raw_df["tags"].apply(lambda game_tags: 1 if tag in game_tags else 0)
+tags_columns_amount = 25
+
+raw_df["tags_list"] = raw_df["tags"].apply(lambda tags: list(ast.literal_eval(tags).keys()))
+
+all_tags = raw_df["tags"].explode()
+top_tags = all_tags.value_counts().head(top_n_tags).index.tolist()
+
+tag_to_index = {tag: idx+1 for idx, tag in enumerate(top_tags)}  # 1 is most popular tag. 0 is reserved for padding
+
+def assign_tag_indices(tags):
+    filtered = [t for t in tags if t in tag_to_index]
+    filtered.sort(key=lambda t: tag_to_index[t])
+
+    top_tags_for_game = filtered[:tags_columns_amount]
+    indices = [tag_to_index[t] for t in top_tags_for_game]
+
+    # Add padding if less tags than tags_columns_amount
+    while len(indices) < tags_columns_amount:
+        indices.append(0)
+    return indices
+
+tags_index_rows = raw_df["tags_list"].apply(assign_tag_indices)
+for tags in tags_index_rows:
+    for i in range(tags_columns_amount):
+        col_name = f"tag_{i+1}"
+        raw_df[col_name] = tags[i]
+
+#Top 300 tags and multi-hot encoding
+# top_n_tags = 300
+# all_tags = raw_df["tags"].apply(lambda tags: ast.literal_eval(tags)).explode()
+# top_tags = all_tags.value_counts().head(top_n_tags).index
+# print(f"[INFO] Total tags found: {all_tags.nunique()}")
+# print(f"[INFO] Using top {top_n_tags} most common")
+# for tag in top_tags:
+#     col_name = f"tag_{tag}".replace(" ", "_").replace("-", "_")
+#     raw_df[col_name] = raw_df["tags"].apply(lambda game_tags: 1 if tag in game_tags else 0)
 
 # Build processed dataframe
-tag_cols = [f"tag_{tag}".replace(" ", "_").replace("-", "_") for tag in top_tags]
+tag_cols = [f"tag_{i+1}" for i in range(tags_columns_amount)]
 processed_df = raw_df[output_cols + tag_cols]
 
 processed_df.to_csv(PROCESSED_PATH, index=False)
