@@ -7,7 +7,7 @@ import os
 import json
 
 EPOCHS = 200
-LR = 0.002
+LR = 0.001
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 train_loader, test_loader, input_dim, tags_columns_amount = get_dataloaders()

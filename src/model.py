@@ -6,7 +6,7 @@ class GameScorePredictor(nn.Module):
         super(GameScorePredictor, self).__init__()
 
         tags_total = 300  
-        embedding_dim = 16
+        embedding_dim = 32
 
         self.tag_embedding = nn.Embedding(num_embeddings=tags_total+1, embedding_dim=embedding_dim, padding_idx=0)
         self.tags_columns_amount = tags_columns_amount
@@ -15,11 +15,14 @@ class GameScorePredictor(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(input_dim, 128),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            #nn.Dropout(0.3),
             nn.Linear(128, 64),
             nn.ReLU(),
-            nn.Dropout(0.3),
-            nn.Linear(64, 1)  
+            #nn.Dropout(0.3),
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            #nn.Dropout(0.3),
+            nn.Linear(32, 1) 
         )
     
     def forward(self, x):

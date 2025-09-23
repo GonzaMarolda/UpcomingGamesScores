@@ -33,11 +33,11 @@ raw_df = add_additional_features(raw_df)
 
 # Create tags index columns for embedding
 top_n_tags = 300
-tags_columns_amount = 25
+tags_columns_amount = 20
 
 raw_df["tags_list"] = raw_df["tags"].apply(lambda tags: list(ast.literal_eval(tags).keys()))
 
-all_tags = raw_df["tags"].explode()
+all_tags = raw_df["tags_list"].explode()
 top_tags = all_tags.value_counts().head(top_n_tags).index.tolist()
 
 tag_to_index = {tag: idx+1 for idx, tag in enumerate(top_tags)}  # 1 is most popular tag. 0 is reserved for padding
@@ -55,10 +55,13 @@ def assign_tag_indices(tags):
     return indices
 
 tags_index_rows = raw_df["tags_list"].apply(assign_tag_indices)
-for tags in tags_index_rows:
-    for i in range(tags_columns_amount):
-        col_name = f"tag_{i+1}"
-        raw_df[col_name] = tags[i]
+tags_df = pd.DataFrame(
+    tags_index_rows.tolist(),
+    columns=[f"tag_{i+1}" for i in range(tags_columns_amount)]
+)
+
+raw_df = raw_df.reset_index(drop=True) # Reset index to align with tags_df
+raw_df = pd.concat([raw_df, tags_df.astype("int64")], axis=1)
 
 #Top 300 tags and multi-hot encoding
 # top_n_tags = 300
