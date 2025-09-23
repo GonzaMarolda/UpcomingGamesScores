@@ -27,4 +27,8 @@ def get_dataloaders(batch_size=32, test_size=0.2, isProduction=False):
     train_loader = DataLoader(train_dataset, batch_size=batch_size, sampler=sampler_train)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, sampler=sampler_test)
 
-    return train_loader, test_loader, X.shape[1] # number of features
+    tags_columns_amount = 0
+    while f"tag_{tags_columns_amount+1}" in df.columns:
+        tags_columns_amount += 1
+
+    return train_loader, test_loader, X.shape[1], tags_columns_amount
