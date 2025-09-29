@@ -17,7 +17,7 @@ class GameScorePredictor(nn.Module):
         self.tag_embedding = nn.Embedding(num_embeddings=globals.top_n_tags+1, embedding_dim=tags_embedding_dim, padding_idx=0)
 
         # Embedding for publishers
-        publishers_embedding_dim = 8
+        publishers_embedding_dim = 16
         self.publisher_embedding = nn.Embedding(num_embeddings=globals.top_n_publishers+2, embedding_dim=publishers_embedding_dim, padding_idx=0) 
 
         input_dim = input_dim + tags_embedding_dim + publishers_embedding_dim - (globals.tags_columns_amount + globals.publishers_columns_amount)
