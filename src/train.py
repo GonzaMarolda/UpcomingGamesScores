@@ -7,12 +7,12 @@ import os
 import json
 
 EPOCHS = 200
-LR = 0.001
+LR = 0.0005
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-train_loader, test_loader, input_dim, tags_columns_amount = get_dataloaders()
+train_loader, test_loader, input_dim, column_names = get_dataloaders()
 
-model = GameScorePredictor(input_dim, tags_columns_amount).to(DEVICE)
+model = GameScorePredictor(input_dim, column_names).to(DEVICE)
 criterion = nn.MSELoss()
 # Weight decay makes weights smaller over time, helping to prevent overfitting. Weights can grow large to adjust too much to the training data.
 optimizer = optim.Adam(model.parameters(), lr=LR, weight_decay=1e-4)
