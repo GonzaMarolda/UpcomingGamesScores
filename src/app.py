@@ -1,5 +1,6 @@
 import json
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from model import GameScorePredictor
 from preprocessing_utils import get_top_tags, get_top_publishers, preprocess_input
 import torch
@@ -7,6 +8,7 @@ import torch.nn as nn
 import pandas as pd
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "http://localhost:4200"}})
 
 with open('../data/metadata.json', 'r') as f:
     metadata = json.load(f)
