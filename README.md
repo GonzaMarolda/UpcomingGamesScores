@@ -28,4 +28,4 @@ Results can be found at trained_models/results, contains:
 
 ## Usage
 The model should be used from the web app: https://github.com/GonzaMarolda/GameScorePredictorApp
-- User input: price, required age, is indie?, supports english?, supported languages amount, tags, and publishers
+- User input: price, year, required age, is indie?, supports english?, supported languages amount, tags, and publishers
