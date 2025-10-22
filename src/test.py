@@ -19,9 +19,9 @@ idx = int(input("Select the index of the desired model: "))
 model_path = os.path.join(MODELS_DIR, model_files[idx])
 print(f"Loading model: {model_files[idx]}")
 
-train_loader, test_loader, input_dim = get_dataloaders()
+train_loader, test_loader, input_columns = get_dataloaders()
 
-model = GameScorePredictor(input_dim).to(DEVICE)
+model = GameScorePredictor(input_columns).to(DEVICE)
 model.load_state_dict(torch.load(model_path))
 model.eval()
 

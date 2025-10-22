@@ -3,8 +3,10 @@ import torch.nn as nn
 import globals
 
 class GameScorePredictor(nn.Module):
-    def __init__(self, input_dim, input_columns):
+    def __init__(self, input_columns):
         super(GameScorePredictor, self).__init__()
+
+        input_dim = len(input_columns)
 
         # Initialize column indices
         self.initial_columns_indices = {}

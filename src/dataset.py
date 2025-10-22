@@ -5,9 +5,8 @@ from torch.utils.data import DataLoader, TensorDataset, WeightedRandomSampler
 
 CSV_PATH = "./data/processed.csv"
 
-def get_dataloaders(batch_size=32, test_size=0.2, isProduction=False):
-    csv_path = CSV_PATH if isProduction else "../data/processed.csv"
-    df = pd.read_csv(csv_path)
+def get_dataloaders(batch_size=32, test_size=0.2):
+    df = pd.read_csv(CSV_PATH)
 
     X = df.drop(columns=["pct_pos_total_norm"]).values.astype("float32") # Pytorch works better with float32
     y = df["pct_pos_total_norm"].values.astype("float32").reshape(-1, 1) # Reshape for as many rows as needed and 1 column
@@ -30,4 +29,4 @@ def get_dataloaders(batch_size=32, test_size=0.2, isProduction=False):
     # Get input column names
     column_names = df.drop(columns=["pct_pos_total_norm"]).columns.tolist()
 
-    return train_loader, test_loader, X.shape[1], column_names
+    return train_loader, test_loader, column_names
