@@ -7,8 +7,8 @@ import os
 import json
 import time
 
-EPOCHS = 2000
-LR = 0.002
+EPOCHS = 200
+LR = 0.001
 DEVICE = torch.device("cuda")
 
 train_loader, test_loader, column_names = get_dataloaders()

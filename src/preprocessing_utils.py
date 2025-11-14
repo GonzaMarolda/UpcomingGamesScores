@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import ast
+import globals
 
 METADATA_PATH = "../data/metadata.json"
 
@@ -91,9 +92,9 @@ def add_additional_features(df, is_api=False):
     return df
 
 # Tag columns for multi-hot => embedding
-def process_tags(df, top_n_tags, tags_columns_amount):
+def process_tags(df, top_n_tags, tags_columns_amount, is_api=False):
     metadata = {} 
-    df["tags_list"] = df["tags"].apply(lambda tags: tags if isinstance(tags, list) else list(ast.literal_eval(tags).keys()))
+    df["tags_list"] = df["tags"].apply(lambda tags: list(ast.literal_eval(tags)) if is_api else list(ast.literal_eval(tags).keys()))
     top_tags = []
     with open(METADATA_PATH, "r") as f:
         metadata = json.load(f)
@@ -197,7 +198,13 @@ def get_top_publishers():
     return metadata.get("top_publishers", [])
 
 def preprocess_input(data):
-    df = pd.read_json(data)
+    # Transform features and publishers lists into strings
+    if "tags" in data and isinstance(data["tags"], list):
+        data["tags"] = str(data["tags"])
+    if "publishers" in data and isinstance(data["publishers"], list):
+        data["publishers"] = str(data["publishers"])
+
+    df = pd.DataFrame(data, index=[0])
 
     print(f"[INFO] Preprocessing input data:")
     print(df)
@@ -206,9 +213,13 @@ def preprocess_input(data):
     df["release_date"] = pd.to_datetime(df["release_year"].astype(str) + "-01-01", errors="coerce")
 
     df = normalize_data(df)
-    df = process_tags(df, globals.top_n_tags, globals.tags_columns_amount, METADATA_PATH)
-    df = process_publishers(df, globals.top_n_publishers, globals.publishers_columns_amount, METADATA_PATH)
-    df = add_additional_features(df)
+    print(f"[INFO] Data normalized")
+    df = process_tags(df, globals.top_n_tags, globals.tags_columns_amount, is_api=True)
+    print(f"[INFO] Tags processed")
+    df = process_publishers(df, globals.top_n_publishers, globals.publishers_columns_amount)
+    print(f"[INFO] Publishers processed")
+    df = add_additional_features(df, is_api=True)
+    print(f"[INFO] Additional features added")
 
     tag_cols = [f"tag_{i+1}" for i in range(globals.tags_columns_amount)]
     publisher_cols = [f"publisher_{i+1}" for i in range(globals.publishers_columns_amount)]

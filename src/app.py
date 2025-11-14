@@ -14,7 +14,7 @@ with open('../data/metadata.json', 'r') as f:
     metadata = json.load(f)
     input_columns = metadata.get("input_columns", [])
 model = GameScorePredictor(input_columns)
-model.load_state_dict(torch.load('../trained_models/models/gamescore_model_v9.pth', map_location=torch.device('cpu')))
+model.load_state_dict(torch.load('../trained_models/models/gamescore_model_v10.pth', map_location=torch.device('cpu')))
 model.eval()
 
 @app.route('/predict', methods=['POST'])
@@ -24,9 +24,13 @@ def predict():
         if not is_data_valid(data):
             return jsonify({"error": "Invalid input data"}), 400
         
+        print("Data is valid:")
+        print(data)
+        
         features = preprocess_input(data)
+        print("Features obtained for prediction")
 
-        input_tensor = torch.tensor(features, dtype=torch.float32)
+        input_tensor = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
         with torch.no_grad():
             prediction = model(input_tensor).item()
 
@@ -44,11 +48,11 @@ def get_tags():
 @app.route('/publishers', methods=['GET'])
 def get_publishers():
     top_publishers = get_top_publishers()
-    return jsonify({"publishers": top_publishers})
+    return jsonify({"publishers": top_publishers + ["Other"]})
 
 def is_data_valid(data): 
     tags = data.get("tags", None)
-    if tags is None or not isinstance(tags, list):
+    if tags is None or not isinstance(tags, list) or tags == []:
         return False
     top_tags = get_top_tags()
     for tag in tags:
@@ -56,11 +60,11 @@ def is_data_valid(data):
             return False
         
     publishers = data.get("publishers", None)
-    if publishers is None or not isinstance(publishers, list):
+    if publishers is None or not isinstance(publishers, list) or publishers == []:
         return False
     top_publishers = get_top_publishers()
     for pub in publishers:
-        if pub not in top_publishers:
+        if pub not in top_publishers and pub != "Other":
             return False
 
     release_year = data.get("release_year", None)

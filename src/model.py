@@ -15,7 +15,7 @@ class GameScorePredictor(nn.Module):
         self.initial_columns_indices["other"] = [i for i, col in enumerate(input_columns) if i not in self.initial_columns_indices["tags"] and i not in self.initial_columns_indices["publishers"]]
 
         # Embedding for tags
-        tags_embedding_dim = 64
+        tags_embedding_dim = 128
         self.tag_embedding = nn.Embedding(num_embeddings=globals.top_n_tags+1, embedding_dim=tags_embedding_dim, padding_idx=0)
 
         # Embedding for publishers
@@ -33,10 +33,11 @@ class GameScorePredictor(nn.Module):
             nn.Linear(128, 64),
             nn.ReLU(),
             # nn.Dropout(0.2),
-            nn.Linear(64, 1),
-            # nn.ReLU(),
+            nn.Linear(64, 32),
+            nn.ReLU(),
             # nn.Dropout(0.2),
-            # nn.Linear(32, 1) 
+            nn.Linear(32, 1),
+            nn.Sigmoid()
         )
     
     def forward(self, x):
