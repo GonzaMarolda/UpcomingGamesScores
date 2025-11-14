@@ -5,10 +5,11 @@ from dataset import get_dataloaders
 from model import GameScorePredictor
 import os
 import json
+import time
 
-EPOCHS = 200
-LR = 0.001
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+EPOCHS = 2000
+LR = 0.002
+DEVICE = torch.device("cuda")
 
 train_loader, test_loader, column_names = get_dataloaders()
 
@@ -25,6 +26,7 @@ for epoch in range(EPOCHS):
     model.train() # Changes how the model behaves for advanced configurations. Not needed for this simple model but good practice.
     running_loss = 0.0
 
+    scaler = torch.cuda.amp.GradScaler()
     for inputs, targets in train_loader:
         inputs, targets = inputs.to(DEVICE), targets.to(DEVICE) # Move data to the same device as model
 
