@@ -1,4 +1,6 @@
-data
+data/exploration.csv
+data/processed.csv
+data/raw.csv
 src/playground.py
 
 # Byte-compiled / optimized / DLL files
