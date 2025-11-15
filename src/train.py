@@ -7,7 +7,7 @@ import os
 import json
 import time
 
-EPOCHS = 200
+EPOCHS = 400
 LR = 0.001
 DEVICE = torch.device("cuda")
 

@@ -14,7 +14,7 @@ with open('../data/metadata.json', 'r') as f:
     metadata = json.load(f)
     input_columns = metadata.get("input_columns", [])
 model = GameScorePredictor(input_columns)
-model.load_state_dict(torch.load('../trained_models/models/gamescore_model_v10.pth', map_location=torch.device('cpu')))
+model.load_state_dict(torch.load('../trained_models/models/gamescore_model_v11.pth', map_location=torch.device('cpu')))
 model.eval()
 
 @app.route('/predict', methods=['POST'])
